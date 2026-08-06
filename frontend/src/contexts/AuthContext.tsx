@@ -3,6 +3,20 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { api, setAccessToken, getAccessToken } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { disconnectSocket } from '@/hooks/useSocket';
+
+// Simple toast helper for auth events
+const showAuthToast = (message: string, isError = false) => {
+  const el = document.createElement("div");
+  el.className = `fixed bottom-4 right-4 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-in slide-in-from-bottom-5 ${isError ? 'bg-destructive' : 'bg-green-600'}`;
+  el.innerText = message;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.classList.add("opacity-0", "transition-opacity", "duration-500");
+    setTimeout(() => el.remove(), 500);
+  }, 3000);
+};
 
 interface User {
   id: string;
@@ -26,6 +40,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  const aggressiveLogout = React.useCallback(() => {
+    setAccessToken(null);
+    setUser(null);
+    queryClient.clear();
+    localStorage.clear();
+    sessionStorage.clear();
+    disconnectSocket();
+    router.replace('/login');
+  }, [queryClient, router]);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      showAuthToast("Session expired. Please log in again.", true);
+      aggressiveLogout();
+    };
+    window.addEventListener('session_expired', handleSessionExpired);
+    return () => window.removeEventListener('session_expired', handleSessionExpired);
+  }, [aggressiveLogout]);
 
   useEffect(() => {
     let mounted = true;
@@ -34,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (!getAccessToken()) {
           // Attempt silent refresh
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, { method: 'POST' });
+          const res = await api.post('/auth/refresh', {});
           if (res.ok) {
             const data = await res.json();
             setAccessToken(data.accessToken);
@@ -57,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: any) => {
     setIsLoading(true);
     try {
-      const res = await api.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, credentials);
+      const res = await api.post('/auth/login', credentials);
       const data = await res.json();
       setAccessToken(data.accessToken);
       setUser(data.user);
@@ -69,13 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await api.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {});
+      await api.post('/auth/logout', {});
     } catch (e) {
       // Ignore network errors on logout
     } finally {
-      setAccessToken(null);
-      setUser(null);
-      router.push('/login');
+      aggressiveLogout();
+      showAuthToast("Signed out successfully");
     }
   };
 

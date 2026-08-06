@@ -40,3 +40,10 @@ export const useSocket = () => {
 
   return { socket, isConnected };
 };
+
+export const disconnectSocket = () => {
+  if (socketInstance) {
+    socketInstance.disconnect();
+    socketInstance = null;
+  }
+};

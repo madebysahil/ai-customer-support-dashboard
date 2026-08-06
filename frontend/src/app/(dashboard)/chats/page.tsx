@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { ConversationList } from "@/components/chat/ConversationList"
 import { ChatPanel } from "@/components/chat/ChatPanel"
 import { MessageSquare } from "lucide-react"
+import { ChatContextPanel } from "@/components/chat/ChatContextPanel"
 
 export default function ChatsPage() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
@@ -15,19 +16,16 @@ export default function ChatsPage() {
         <h1 className="text-3xl font-bold tracking-tight">Live Chats</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0">
         {/* Left Pane: Chat List */}
-        <Card className="col-span-1 flex flex-col overflow-hidden">
-          <div className="p-4 border-b bg-muted/20 shrink-0">
-            <h2 className="font-semibold">Inbox</h2>
-          </div>
-          <div className="flex-1 min-h-0 overflow-y-auto">
+        <Card className="col-span-1 lg:col-span-3 flex flex-col overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col">
             <ConversationList activeChatId={activeChatId} onSelect={setActiveChatId} />
           </div>
         </Card>
         
-        {/* Right Pane: Active Chat */}
-        <Card className="col-span-1 md:col-span-3 overflow-hidden shadow-md">
+        {/* Center Pane: Active Chat */}
+        <Card className="col-span-1 lg:col-span-6 overflow-hidden shadow-md">
           {activeChatId ? (
             <ChatPanel chatId={activeChatId} />
           ) : (
@@ -38,6 +36,11 @@ export default function ChatsPage() {
               <p className="font-medium text-lg">Select a conversation to start messaging</p>
             </div>
           )}
+        </Card>
+
+        {/* Right Pane: Customer Context */}
+        <Card className="col-span-1 lg:col-span-3 flex flex-col overflow-hidden hidden lg:flex">
+          <ChatContextPanel chatId={activeChatId} />
         </Card>
       </div>
     </div>

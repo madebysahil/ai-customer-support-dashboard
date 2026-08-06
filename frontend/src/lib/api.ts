@@ -17,6 +17,9 @@ export const setAccessToken = (token: string | null) => {
 export const getAccessToken = () => accessToken;
 
 async function fetchWithInterceptor(url: string, options: RequestInit = {}) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+
   const headers = new Headers(options.headers);
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
@@ -26,18 +29,21 @@ async function fetchWithInterceptor(url: string, options: RequestInit = {}) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(url, {
+  const fetchOptions: RequestInit = {
     ...options,
     headers,
-  });
+    credentials: 'include',
+  };
+
+  const response = await fetch(fullUrl, fetchOptions);
 
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 && !fullUrl.endsWith('/auth/refresh') && !fullUrl.endsWith('/auth/login')) {
       // Attempt refresh
-      const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+      const refreshResponse = await fetch(`${baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Native fetch handles cookies automatically based on credentials mode
+        credentials: 'include',
       });
       
       if (refreshResponse.ok) {
@@ -46,12 +52,20 @@ async function fetchWithInterceptor(url: string, options: RequestInit = {}) {
         
         // Retry original request
         headers.set('Authorization', `Bearer ${newToken}`);
-        const retryResponse = await fetch(url, { ...options, headers });
+        const retryOptions: RequestInit = {
+          ...options,
+          headers,
+          credentials: 'include',
+        };
+        const retryResponse = await fetch(fullUrl, retryOptions);
         if (!retryResponse.ok) throw await createApiError(retryResponse);
         return retryResponse;
       } else {
         // Refresh failed, clear token and let AuthContext handle redirect
         setAccessToken(null);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('session_expired'));
+        }
         throw new ApiError(401, 'Session expired');
       }
     }

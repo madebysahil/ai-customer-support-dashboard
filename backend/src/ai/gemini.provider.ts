@@ -4,7 +4,7 @@ import { env } from '../config/env';
 
 export class GeminiProvider implements IAiProvider {
   private genAI: GoogleGenerativeAI;
-  private defaultModel = 'gemini-pro';
+  private defaultModel = 'gemini-flash-latest';
   private promptVersion = 'v1.0.0';
 
   constructor() {
@@ -106,6 +106,11 @@ export class GeminiProvider implements IAiProvider {
     const { systemInstruction, history } = this.mapMessagesToGeminiFormat(messages);
     const latestMessage = history.pop();
     if (!latestMessage) throw new Error('No user message provided to Gemini');
+
+    if (systemInstruction && history.length === 0) {
+       history.push({ role: 'user', parts: [{ text: `SYSTEM DIRECTIVE: ${systemInstruction}` }] });
+       history.push({ role: 'model', parts: [{ text: `Understood.` }] });
+    }
 
     const model = this.genAI.getGenerativeModel({ model: this.defaultModel });
     const chat = model.startChat({ history });

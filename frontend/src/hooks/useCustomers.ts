@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+
 
 export interface Customer {
   id: string;
@@ -35,7 +35,7 @@ export function useCustomers(params: any = {}) {
       Object.entries(params).forEach(([key, value]) => {
         if (value) searchParams.append(key, value as string);
       });
-      const res = await api.get(`${API_URL}/customers?${searchParams.toString()}`);
+      const res = await api.get(`/customers?${searchParams.toString()}`);
       return res.json();
     },
   });
@@ -45,7 +45,7 @@ export function useCustomer(id: string) {
   return useQuery<Customer>({
     queryKey: ["customers", id],
     queryFn: async () => {
-      const res = await api.get(`${API_URL}/customers/${id}`);
+      const res = await api.get(`/customers/${id}`);
       return res.json();
     },
     enabled: !!id,
@@ -56,7 +56,7 @@ export function useCreateCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<Customer>) => {
-      const res = await api.post(`${API_URL}/customers`, data);
+      const res = await api.post(`/customers`, data);
       return res.json();
     },
     onSuccess: () => {
@@ -69,7 +69,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Customer> }) => {
-      const res = await api.put(`${API_URL}/customers/${id}`, data, { method: 'PATCH' }); // using fetch wrapper overriding method to PATCH
+      const res = await api.put(`/customers/${id}`, data, { method: 'PATCH' }); // using fetch wrapper overriding method to PATCH
       return res.json();
     },
     onSuccess: (data, variables) => {
@@ -83,7 +83,7 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`${API_URL}/customers/${id}`);
+      await api.delete(`/customers/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });

@@ -73,7 +73,9 @@ export class TicketService {
   }
 
   async listTickets(options: any) {
-    const { page = 1, limit = 20, status, priority, assignedToId, search } = options;
+    const page = parseInt(options.page as string) || 1;
+    const limit = parseInt(options.limit as string) || 20;
+    const { status, priority, assignedToId, search } = options;
     const skip = (page - 1) * limit;
 
     const where: Prisma.TicketWhereInput = {};

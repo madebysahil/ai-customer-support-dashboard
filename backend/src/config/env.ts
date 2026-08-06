@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
-import path from 'path';
 
-// Load environment variables from the root .env file if it exists
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
 
 /**
  * Zod schema to validate environment variables securely.
@@ -11,7 +9,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 const envSchema = z.object({
   PORT: z.string().default('5000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  CORS_ORIGIN: z.string().url(),
   DATABASE_URL: z.string().url(),
   JWT_ACCESS_SECRET: z.string().min(10),
   JWT_REFRESH_SECRET: z.string().min(10),

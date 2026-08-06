@@ -6,6 +6,8 @@ import chatRoutes from './chat.routes';
 import ticketRoutes from './ticket.routes';
 import analyticsRoutes from './analytics.routes';
 import notificationRoutes from './notification.routes';
+import knowledgeRoutes from './knowledge.routes';
+import aiRoutes from './ai.routes';
 
 const router = Router();
 
@@ -16,6 +18,8 @@ router.use('/chats', chatRoutes);
 router.use('/tickets', ticketRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/knowledge', knowledgeRoutes);
+router.use('/ai', aiRoutes);
 
 // Additional routes will be mounted here in future phases
 

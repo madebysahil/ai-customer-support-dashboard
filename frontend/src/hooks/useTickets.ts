@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { PaginatedResponse } from "./useCustomers";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+
 
 export interface Ticket {
   id: string;
@@ -42,7 +42,7 @@ export function useTickets(params: any = {}) {
       Object.entries(params).forEach(([key, value]) => {
         if (value) searchParams.append(key, value as string);
       });
-      const res = await api.get(`${API_URL}/tickets?${searchParams.toString()}`);
+      const res = await api.get(`/tickets?${searchParams.toString()}`);
       return res.json();
     },
   });
@@ -52,7 +52,7 @@ export function useTicket(id: string) {
   return useQuery<{ data: Ticket }>({
     queryKey: ["tickets", id],
     queryFn: async () => {
-      const res = await api.get(`${API_URL}/tickets/${id}`);
+      const res = await api.get(`/tickets/${id}`);
       return res.json();
     },
     enabled: !!id,
@@ -63,7 +63,7 @@ export function useUpdateTicket() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Ticket> }) => {
-      const res = await api.put(`${API_URL}/tickets/${id}`, data, { method: 'PATCH' });
+      const res = await api.put(`/tickets/${id}`, data, { method: 'PATCH' });
       return res.json();
     },
     onSuccess: (_, variables) => {
@@ -77,7 +77,7 @@ export function useAddTicketComment() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, content, isInternal }: { id: string; content: string; isInternal: boolean }) => {
-      const res = await api.post(`${API_URL}/tickets/${id}/comments`, { content, isInternal });
+      const res = await api.post(`/tickets/${id}/comments`, { content, isInternal });
       return res.json();
     },
     onSuccess: (_, variables) => {
