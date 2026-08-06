@@ -1,0 +1,365 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique @db.VarChar(255)
+  passwordHash       String              @map("password_hash") @db.VarChar(255)
+  fullName           String              @map("full_name") @db.VarChar(150)
+  role               Role
+  availabilityStatus Availability        @map("availability_status")
+  avatarUrl          String?             @map("avatar_url") @db.VarChar(512)
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  auditLogs          AuditLog[]          @relation("Actor")
+  chatsAssigned      Chat[]              @relation("AssignedAgent")
+  faqsAuthored       Faq[]               @relation("Author")
+  knowledgeAuthored  KnowledgeDocument[] @relation("KbAuthor")
+  notifications      Notification[]      @relation("Recipient")
+  sessions           Session[]           @relation("UserSessions")
+  ticketComments     TicketComment[]     @relation("UserComments")
+  ticketsAssigned    Ticket[]            @relation("AssignedTo")
+
+  @@index([role, availabilityStatus])
+  @@map("users")
+}
+
+model Customer {
+  id          String          @id @default(uuid())
+  email       String          @unique @db.VarChar(255)
+  displayName String          @map("display_name") @db.VarChar(150)
+  companyName String?         @map("company_name") @db.VarChar(150)
+  phoneNumber String?         @map("phone_number") @db.VarChar(50)
+  csatAverage Decimal?        @map("csat_average") @db.Decimal(3, 2)
+  metadata    Json?
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?       @map("deleted_at") @db.Timestamptz(6)
+  chats       Chat[]
+  comments    TicketComment[] @relation("CustomerComments")
+  tickets     Ticket[]
+
+  @@map("customers")
+}
+
+model Chat {
+  id                  String               @id @default(uuid())
+  customerId          String               @map("customer_id")
+  assignedAgentId     String?              @map("assigned_agent_id")
+  status              ChatStatus
+  channelOrigin       ChannelOrigin        @default(WEB_WIDGET) @map("channel_origin")
+  currentSentiment    Float?               @map("current_sentiment")
+  escalationTriggered Boolean              @default(false) @map("escalation_triggered")
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  closedAt            DateTime?            @map("closed_at") @db.Timestamptz(6)
+  assignedAgent       User?                @relation("AssignedAgent", fields: [assignedAgentId], references: [id])
+  customer            Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  summary             ConversationSummary?
+  messages            Message[]
+  tickets             Ticket[]
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([status, createdAt])
+  @@map("chats")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  chatId         String       @map("chat_id")
+  authorType     AuthorType   @map("author_type")
+  authorId       String       @map("author_id") @db.VarChar(255)
+  content        String
+  sentimentScore Float?       @map("sentiment_score")
+  isRead         Boolean      @default(false) @map("is_read")
+  readAt         DateTime?    @map("read_at") @db.Timestamptz(6)
+  metadata       Json?
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  attachments    Attachment[]
+  chat           Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@map("messages")
+}
+
+model Ticket {
+  id                       String          @id @default(uuid())
+  customerId               String          @map("customer_id")
+  assignedToId             String?         @map("assigned_to_id")
+  originChatId             String?         @map("origin_chat_id")
+  ticketNumber             String          @unique @map("ticket_number") @db.VarChar(50)
+  subject                  String          @db.VarChar(255)
+  description              String
+  priority                 TicketPriority
+  status                   TicketStatus
+  origin                   TicketOrigin    @default(MANUAL)
+  category                 String?         @db.VarChar(100)
+  slaBreached              Boolean         @default(false) @map("sla_breached")
+  firstResponseSlaBreached Boolean         @default(false) @map("first_response_sla_breached")
+  dueDate                  DateTime        @map("due_date") @db.Timestamptz(6)
+  firstResponseAt          DateTime?       @map("first_response_at") @db.Timestamptz(6)
+  createdAt                DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  resolvedAt               DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  deletedAt                DateTime?       @map("deleted_at") @db.Timestamptz(6)
+  attachments              Attachment[]
+  comments                 TicketComment[]
+  assignedTo               User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
+  customer                 Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  originChat               Chat?           @relation(fields: [originChatId], references: [id])
+
+  @@index([assignedToId, status, priority])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id               String    @id @default(uuid())
+  ticketId         String    @map("ticket_id")
+  content          String
+  isInternal       Boolean   @default(false) @map("is_internal")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  authorUserId     String?   @map("author_user_id")
+  authorCustomerId String?   @map("author_customer_id")
+  authorCustomer   Customer? @relation("CustomerComments", fields: [authorCustomerId], references: [id])
+  authorUser       User?     @relation("UserComments", fields: [authorUserId], references: [id])
+  ticket           Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_comments")
+}
+
+model Faq {
+  id              String                 @id @default(uuid())
+  authorId        String?                @map("author_id")
+  title           String                 @db.VarChar(255)
+  slug            String                 @unique @db.VarChar(255)
+  category        String                 @db.VarChar(100)
+  content         String
+  status          FaqStatus
+  versionTag      Int                    @default(1) @map("version_tag")
+  embeddingVector Unsupported("vector")? @map("embedding_vector")
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  author          User?                  @relation("Author", fields: [authorId], references: [id])
+
+  @@map("faqs")
+}
+
+model KnowledgeDocument {
+  id               String          @id @default(uuid())
+  title            String          @db.VarChar(255)
+  originalFileName String          @map("original_file_name") @db.VarChar(255)
+  mimeType         String          @map("mime_type") @db.VarChar(100)
+  status           DocumentStatus  @default(UPLOADED)
+  category         String?         @db.VarChar(100)
+  tags             String[]
+  authorId         String?         @map("author_id")
+  metadata         Json?
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  chunks           DocumentChunk[]
+  author           User?           @relation("KbAuthor", fields: [authorId], references: [id])
+
+  @@map("knowledge_documents")
+}
+
+model DocumentChunk {
+  id               String                 @id @default(uuid())
+  documentId       String                 @map("document_id")
+  content          String
+  tokenCount       Int                    @map("token_count")
+  embeddingModel   String                 @map("embedding_model") @db.VarChar(100)
+  embeddingVersion String                 @map("embedding_version") @db.VarChar(50)
+  embeddingVector  Unsupported("vector")? @map("embedding_vector")
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  document         KnowledgeDocument      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_chunks")
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  eventType  String   @map("event_type") @db.VarChar(100)
+  metricVal  Float?   @map("metric_val")
+  dimensions Json?
+  recordedAt DateTime @default(now()) @map("recorded_at") @db.Timestamptz(6)
+
+  @@index([recordedAt, eventType])
+  @@map("analytics_events")
+}
+
+model Notification {
+  id           String       @id @default(uuid())
+  recipientId  String       @map("recipient_id")
+  title        String       @db.VarChar(150)
+  message      String
+  priorityTier PriorityTier @map("priority_tier")
+  linkUrl      String?      @map("link_url") @db.VarChar(512)
+  isRead       Boolean      @default(false) @map("is_read")
+  expiresAt    DateTime?    @map("expires_at") @db.Timestamptz(6)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  recipient    User         @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model SystemSetting {
+  configKey   String   @id @map("config_key") @db.VarChar(100)
+  configValue Json     @map("config_value")
+  description String?  @db.VarChar(255)
+  isSensitive Boolean  @default(false) @map("is_sensitive")
+  updatedById String?  @map("updated_by_id") @db.VarChar(255)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_settings")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorId       String?  @map("actor_id")
+  action        String   @db.VarChar(150)
+  resourceType  String   @map("resource_type") @db.VarChar(100)
+  resourceId    String   @map("resource_id") @db.VarChar(255)
+  previousState Json?    @map("previous_state")
+  newState      Json?    @map("new_state")
+  ipAddress     String?  @map("ip_address") @db.VarChar(45)
+  userAgent     String?  @map("user_agent") @db.VarChar(512)
+  executedAt    DateTime @default(now()) @map("executed_at") @db.Timestamptz(6)
+  actor         User?    @relation("Actor", fields: [actorId], references: [id])
+
+  @@index([executedAt(sort: Desc), resourceType])
+  @@map("audit_logs")
+}
+
+model Attachment {
+  id            String   @id @default(uuid())
+  messageId     String?  @map("message_id")
+  ticketId      String?  @map("ticket_id")
+  fileName      String   @map("file_name") @db.VarChar(255)
+  fileSizeBytes Int      @map("file_size_bytes")
+  mimeType      String   @map("mime_type") @db.VarChar(100)
+  storagePath   String   @map("storage_path") @db.VarChar(512)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  message       Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  ticket        Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([ticketId])
+  @@map("attachments")
+}
+
+model ConversationSummary {
+  id               String   @id @default(uuid())
+  chatId           String   @unique @map("chat_id")
+  coreProblem      String   @map("core_problem") @db.VarChar(255)
+  stepsAttempted   Json     @map("steps_attempted")
+  customerDemeanor String   @map("customer_demeanor") @db.VarChar(100)
+  actionItems      Json     @map("action_items")
+  generatedAt      DateTime @default(now()) @map("generated_at") @db.Timestamptz(6)
+  chat             Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_summaries")
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  refreshTokenHash String   @map("refresh_token_hash") @db.VarChar(512)
+  isRevoked        Boolean  @default(false) @map("is_revoked")
+  expiresAt        DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  ipAddress        String?  @map("ip_address") @db.VarChar(45)
+  userAgent        String?  @map("user_agent") @db.VarChar(512)
+  user             User     @relation("UserSessions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRevoked])
+  @@map("sessions")
+}
+
+enum Role {
+  ADMINISTRATOR
+  MANAGER
+  SUPPORT_AGENT
+}
+
+enum Availability {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
+}
+
+enum ChatStatus {
+  AI_HANDLED
+  QUEUED
+  IN_PROGRESS
+  RESOLVED
+  ABATED
+}
+
+enum ChannelOrigin {
+  WEB_WIDGET
+  EMAIL
+  MOBILE_SDK
+}
+
+enum AuthorType {
+  CUSTOMER
+  SUPPORT_AGENT
+  AI_ASSISTANT
+  SYSTEM_EVENT
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING_CLIENT
+  PENDING_INTERNAL
+  RESOLVED
+  CLOSED
+}
+
+enum TicketOrigin {
+  MANUAL
+  AI_ESCALATION
+  CUSTOMER_REQUEST
+  SYSTEM
+}
+
+enum FaqStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  UPLOADED
+  EXTRACTING
+  CHUNKING
+  EMBEDDING
+  INDEXING
+  READY
+  FAILED
+}
+
+enum PriorityTier {
+  INFO
+  WARNING
+  CRITICAL
+}
