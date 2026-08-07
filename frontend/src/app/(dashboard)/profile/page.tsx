@@ -21,7 +21,7 @@ export default function ProfilePage() {
       <div className="flex items-end justify-between border-b pb-6">
         <div className="flex items-center gap-6">
           <Avatar className="h-24 w-24 border-4 border-background shadow-sm">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
+            <AvatarImage src={user?.avatarUrl || "https://github.com/shadcn.png"} alt={user?.fullName || "User"} />
             <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
