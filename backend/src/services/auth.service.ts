@@ -62,7 +62,8 @@ export class AuthService {
       // Revoke old session and issue new tokens (Refresh Token Rotation)
       await sessionRepository.revoke(session.id);
 
-      return this.generateTokens(user.id, user.role, ipAddress, userAgent);
+      const tokens = await this.generateTokens(user.id, user.role, ipAddress, userAgent);
+      return { tokens, user };
     } catch (error) {
       throw new Error('Invalid refresh token');
     }

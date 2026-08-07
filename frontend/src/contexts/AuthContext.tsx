@@ -72,9 +72,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (res.ok) {
             const data = await res.json();
             setAccessToken(data.accessToken);
-            // Decode JWT to get user state, or fetch /me endpoint. For simplicity, we parse JWT manually.
-            const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-            if (mounted) setUser({ id: payload.sub, role: payload.role, email: '', fullName: '' }); // Usually we'd fetch the full user profile here
+            if (data.user && mounted) {
+              setUser(data.user);
+            } else if (mounted) {
+              // Fallback if backend hasn't updated yet
+              const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+              setUser({ id: payload.sub, role: payload.role, email: '', fullName: '' });
+            }
           }
         }
       } catch (e) {

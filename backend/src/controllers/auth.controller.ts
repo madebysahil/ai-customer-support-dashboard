@@ -51,7 +51,7 @@ export class AuthController {
       const ipAddress = req.ip;
       const userAgent = req.headers['user-agent'];
 
-      const tokens = await authService.refreshTokens(refreshToken, ipAddress, userAgent);
+      const { tokens, user } = await authService.refreshTokens(refreshToken, ipAddress, userAgent);
 
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
@@ -61,6 +61,7 @@ export class AuthController {
       });
 
       res.status(200).json({
+        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName, avatarUrl: user.avatarUrl },
         accessToken: tokens.accessToken,
       });
     } catch (error) {
