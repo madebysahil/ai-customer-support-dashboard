@@ -6,6 +6,10 @@ import { useTheme } from "next-themes"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 
+import { SidebarNav } from "./SidebarNav"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
+
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -48,7 +52,24 @@ export function CommandHeader() {
   }
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm z-10 shrink-0">
+    <header className="flex h-16 items-center gap-2 md:gap-4 border-b bg-background px-4 md:px-6 shadow-sm z-10 shrink-0">
+      {/* Mobile Menu Trigger */}
+      <div className="md:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0 border-r-0">
+            <div className="flex h-full flex-col py-6 overflow-y-auto">
+              <SidebarNav />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
       <div className="flex items-center gap-4 w-full flex-1">
         <form className="hidden sm:block">
           <div className="relative group">
