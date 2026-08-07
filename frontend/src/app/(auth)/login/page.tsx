@@ -78,10 +78,48 @@ export default function LoginPage() {
             )}
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col gap-4">
           <Button className="w-full" type="submit" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
+          
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or quick login as
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <Button 
+              type="button" 
+              variant="outline" 
+              disabled={isLoading}
+              onClick={() => {
+                form.setValue("email", "admin@example.com")
+                form.setValue("password", "Admin@123")
+                form.handleSubmit(onSubmit)()
+              }}
+            >
+              Demo Admin
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              disabled={isLoading}
+              onClick={() => {
+                form.setValue("email", "agent@example.com")
+                form.setValue("password", "Agent@123")
+                form.handleSubmit(onSubmit)()
+              }}
+            >
+              Demo Agent
+            </Button>
+          </div>
         </CardFooter>
       </form>
     </Card>
