@@ -84,7 +84,12 @@ export function CommandHeader() {
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
-        <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative rounded-full text-muted-foreground hover:text-foreground"
+          onClick={() => showToast("You have 2 new high-priority tickets!")}
+        >
           <Bell className="h-5 w-5" />
           <span className="absolute right-[9px] top-[9px] flex h-2 w-2 rounded-full bg-destructive border-2 border-background" />
           <span className="sr-only">Toggle notifications</span>
@@ -95,7 +100,7 @@ export function CommandHeader() {
             <Button variant="ghost" size="icon" className="rounded-full ml-1 ring-2 ring-transparent hover:ring-primary/20 transition-all duration-200">
               <div className="relative">
                 <Avatar className="h-9 w-9 border border-border/50">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage src={user?.avatarUrl || "https://github.com/shadcn.png"} alt={user?.fullName || "User"} />
                   <AvatarFallback>{user?.role === 'ADMINISTRATOR' ? 'AD' : 'JD'}</AvatarFallback>
                 </Avatar>
                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-background" />
