@@ -33,7 +33,7 @@ export class AuthController {
       });
 
       res.status(200).json({
-        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName },
+        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName, avatarUrl: user.avatarUrl },
         accessToken,
       });
     } catch (error) {
