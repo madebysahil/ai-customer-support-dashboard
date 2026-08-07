@@ -8,24 +8,46 @@ async function main() {
     where: { email: 'admin@example.com' },
   });
 
-  if (existingAdmin) {
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash('Admin@123', 12);
+
+    await prisma.user.create({
+      data: {
+        email: 'admin@example.com',
+        passwordHash,
+        fullName: 'System Administrator',
+        role: 'ADMINISTRATOR',
+        availabilityStatus: 'ONLINE',
+        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin&backgroundColor=ffdfbf',
+      },
+    });
+
+    console.log('✅ Admin user seeded successfully.');
+  } else {
     console.log('✅ Admin user already exists. Skipping seed.');
-    return;
   }
 
-  const passwordHash = await bcrypt.hash('Admin@123', 12);
-
-  await prisma.user.create({
-    data: {
-      email: 'admin@example.com',
-      passwordHash,
-      fullName: 'System Administrator',
-      role: 'ADMINISTRATOR',
-      availabilityStatus: 'ONLINE',
-    },
+  // Create a standard test user (Agent)
+  const existingAgent = await prisma.user.findUnique({
+    where: { email: 'agent@example.com' },
   });
 
-  console.log('✅ Admin user seeded successfully.');
+  if (!existingAgent) {
+    const agentPasswordHash = await bcrypt.hash('Agent@123', 12);
+    await prisma.user.create({
+      data: {
+        email: 'agent@example.com',
+        passwordHash: agentPasswordHash,
+        fullName: 'Support Agent',
+        role: 'SUPPORT_AGENT',
+        availabilityStatus: 'ONLINE',
+        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Agent&backgroundColor=b6e3f4',
+      },
+    });
+    console.log('✅ Agent user seeded successfully.');
+  } else {
+    console.log('✅ Agent user already exists. Skipping seed.');
+  }
 }
 
 main()
