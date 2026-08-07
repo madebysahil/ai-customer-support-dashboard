@@ -19,8 +19,8 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full md:w-64 flex flex-col md:flex-row gap-8">
-          <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 space-y-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full flex flex-col md:flex-row gap-8">
+          <TabsList className="flex flex-col h-auto w-full md:w-64 bg-transparent p-0 space-y-1 shrink-0">
             <TabsTrigger 
               value="general" 
               className="w-full justify-start px-4 py-2.5 h-auto text-left font-normal data-[state=active]:bg-muted data-[state=active]:font-medium data-[state=active]:shadow-none rounded-md"
