@@ -2,6 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["lucide-react"],
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://ai-customer-support-dashboard-1lae.onrender.com/api/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
