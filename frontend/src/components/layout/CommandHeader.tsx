@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Bell, Search, Sun, Moon, Sparkles, Command } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/hooks/useAuth"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 import { SidebarNav } from "./SidebarNav"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -42,7 +42,14 @@ export function CommandHeader() {
   const { setTheme, theme } = useTheme()
   const { user, logout } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Automatically close the mobile menu when the user navigates to a new page
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -55,7 +62,7 @@ export function CommandHeader() {
     <header className="flex h-16 items-center gap-2 md:gap-4 border-b bg-background px-4 md:px-6 shadow-sm z-10 shrink-0">
       {/* Mobile Menu Trigger */}
       <div className="md:hidden">
-        <Sheet>
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
               <Menu className="h-5 w-5" />
