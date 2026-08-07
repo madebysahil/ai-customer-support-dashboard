@@ -10,7 +10,6 @@ async function main() {
 
   if (!existingAdmin) {
     const passwordHash = await bcrypt.hash('Admin@123', 12);
-
     await prisma.user.create({
       data: {
         email: 'admin@example.com',
@@ -21,10 +20,14 @@ async function main() {
         avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin&backgroundColor=ffdfbf',
       },
     });
-
     console.log('✅ Admin user seeded successfully.');
   } else {
-    console.log('✅ Admin user already exists. Skipping seed.');
+    // Force update avatar
+    await prisma.user.update({
+      where: { email: 'admin@example.com' },
+      data: { avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin&backgroundColor=ffdfbf' }
+    });
+    console.log('✅ Admin user already exists. Avatar updated.');
   }
 
   // Create a standard test user (Agent)
@@ -46,7 +49,12 @@ async function main() {
     });
     console.log('✅ Agent user seeded successfully.');
   } else {
-    console.log('✅ Agent user already exists. Skipping seed.');
+    // Force update avatar
+    await prisma.user.update({
+      where: { email: 'agent@example.com' },
+      data: { avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Agent&backgroundColor=b6e3f4' }
+    });
+    console.log('✅ Agent user already exists. Avatar updated.');
   }
 }
 
