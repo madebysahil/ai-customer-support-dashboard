@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --background: 0 0% 100%;
+    --background-subtle: 0 0% 98%;
+    --surface: 0 0% 100%;
+    --surface-raised: 0 0% 99%;
+    
+    /* Foregrounds */
+    --foreground: 0 0% 9%;
+    --foreground-muted: 0 0% 45%;
+    --foreground-subtle: 0 0% 64%;
+    
+    /* Borders */
+    --border: 0 0% 90%;
+    --border-subtle: 0 0% 94%;
+    
+    /* Interactive */
+    --primary: 222 47% 45%;
+    --primary-hover: 222 47% 38%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Semantic Status */
+    --success: 152 56% 39%;
+    --warning: 38 92% 50%;
+    --critical: 0 72% 51%;
+    --info: 210 100% 45%;
+
+    /* Keep old tokens for backwards compatibility temporarily but map them to new */
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: var(--foreground-muted);
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: var(--critical);
+    --destructive-foreground: 0 0% 100%;
+    --success-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 9%;
+    --info-foreground: 0 0% 100%;
+    --input: var(--border);
+    --ring: var(--primary);
+
+    /* AI (subtle, not thematic) */
+    --ai-surface: 0 0% 97%;
+    --ai-border: 0 0% 88%;
+    --ai-accent: 222 47% 45%;
+
+    --radius: 6px;
+  }
+
+  .dark {
+    /* Backgrounds */
+    --background: 0 0% 6%;
+    --background-subtle: 0 0% 4%;
+    --surface: 0 0% 9%;
+    --surface-raised: 0 0% 12%;
+    
+    /* Foregrounds */
+    --foreground: 0 0% 93%;
+    --foreground-muted: 0 0% 55%;
+    --foreground-subtle: 0 0% 40%;
+    
+    /* Borders */
+    --border: 0 0% 16%;
+    --border-subtle: 0 0% 12%;
+    
+    /* Interactive */
+    --primary: 222 50% 58%;
+    --primary-hover: 222 50% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Semantic Status */
+    --success: 152 56% 45%;
+    --warning: 38 92% 55%;
+    --critical: 0 72% 58%;
+    --info: 210 100% 55%;
+
+    /* Keep old tokens for backwards compatibility temporarily but map them to new */
+    --card: var(--surface);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface);
+    --popover-foreground: var(--foreground);
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 16%;
+    --muted-foreground: var(--foreground-muted);
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: var(--critical);
+    --destructive-foreground: 0 0% 100%;
+    --success-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 98%;
+    --info-foreground: 0 0% 100%;
+    --input: var(--border);
+    --ring: var(--primary);
+
+    /* AI (subtle, not thematic) */
+    --ai-surface: 0 0% 11%;
+    --ai-border: 0 0% 18%;
+    --ai-accent: 222 50% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
