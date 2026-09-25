@@ -13,7 +13,6 @@ import {
   Command,
   Sun,
   Moon,
-  Bell,
   User,
   Settings,
   Palette,
@@ -40,7 +39,7 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { toast } from "@/components/ui/toaster"
+import { NotificationBell } from "@/components/notifications/NotificationBell"
 
 export function CommandHeader() {
   const { setTheme, theme } = useTheme()
@@ -123,16 +122,7 @@ export function CommandHeader() {
             <span className="sr-only">Toggle theme</span>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative rounded-md h-8 w-8 text-foreground-muted hover:text-foreground hover:bg-background-subtle"
-            onClick={() => toast({ title: "You have 2 new high-priority tickets!" })}
-          >
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-1.5 top-1.5 flex h-1.5 w-1.5 rounded-full bg-critical border border-surface" />
-            <span className="sr-only">Toggle notifications</span>
-          </Button>
+          <NotificationBell />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

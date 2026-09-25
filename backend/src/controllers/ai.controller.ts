@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { geminiProvider } from '../ai/gemini.provider';
+import { openrouterProvider } from '../ai/openrouter.provider';
 import { PromptBuilder } from '../ai/prompt.builder';
 import { AiMessage } from '../ai/provider.interface';
 import { logger } from '../utils/logger';
@@ -58,7 +58,7 @@ ${ragContextString}`
 
       const fullMessages = [systemMessage, ...messages];
 
-      const metadata = await geminiProvider.generateStream(
+      const metadata = await openrouterProvider.generateStream(
         fullMessages,
         (chunk: string) => {
           // SSE format

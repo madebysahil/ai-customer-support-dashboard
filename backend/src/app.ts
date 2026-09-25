@@ -26,12 +26,19 @@ app.use(
         connectSrc: ["'self'", env.CORS_ORIGIN],
       },
     },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin === env.CORS_ORIGIN) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );

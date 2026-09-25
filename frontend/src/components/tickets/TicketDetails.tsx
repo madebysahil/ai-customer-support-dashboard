@@ -1,18 +1,96 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { useTicket, useAddTicketComment, useUpdateTicket } from "@/hooks/useTickets"
 import { Button } from "@/components/ui/button"
 import { Loader2, Send, Lock, User as UserIcon, CheckCircle2, Clock, Inbox, AlertCircle, FileText, CornerDownLeft, X } from "lucide-react"
-import ReactMarkdown from "react-markdown"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+
+interface TicketCommentComposerProps {
+  ticketId: string;
+}
+
+export const TicketCommentComposer = React.memo(function TicketCommentComposer({ ticketId }: TicketCommentComposerProps) {
+  const [comment, setComment] = useState("")
+  const [isInternal, setIsInternal] = useState(false)
+  const addComment = useAddTicketComment()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!comment.trim()) return;
+
+    addComment.mutate(
+      { id: ticketId, content: comment, isInternal },
+      {
+        onSuccess: () => {
+          setComment("");
+        },
+      }
+    );
+  };
+
+  return (
+    <div className="p-4 bg-background border-t border-border-subtle shrink-0">
+      <form
+        onSubmit={handleSubmit}
+        className={`max-w-3xl mx-auto rounded-md border flex flex-col transition-colors bg-surface ${
+          isInternal
+            ? "border-warning/40 ring-1 ring-warning/20"
+            : "border-border focus-within:ring-1 focus-within:ring-primary focus-within:border-primary"
+        }`}
+      >
+        <div
+          className={`px-3 py-1.5 text-[11px] font-medium border-b flex items-center gap-2 ${
+            isInternal
+              ? "bg-warning/10 text-warning-muted border-warning/20"
+              : "bg-background-subtle text-foreground-muted border-border-subtle"
+          }`}
+        >
+          {isInternal ? <Lock className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+          {isInternal ? "Private Internal Note" : "Public Reply"}
+        </div>
+        <textarea
+          className="w-full min-h-[80px] p-3 text-[13px] resize-none focus:outline-none bg-transparent"
+          placeholder={isInternal ? "Type a private note visible only to your team..." : "Type your reply to the customer (Markdown supported)..."}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <div
+          className={`flex justify-between items-center px-2 py-2 border-t ${
+            isInternal ? "bg-warning/5 border-warning/20" : "bg-background-subtle border-border-subtle"
+          }`}
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-7 text-[11px] ${
+              isInternal
+                ? "text-warning-muted hover:bg-warning/10 hover:text-warning"
+                : "text-foreground-muted hover:text-foreground"
+            }`}
+            onClick={() => setIsInternal(!isInternal)}
+          >
+            <Lock className="mr-1.5 h-3 w-3" /> {isInternal ? "Switch to Public Reply" : "Make Internal"}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            className={`h-7 text-[11px] ${isInternal ? "bg-warning text-warning-foreground hover:bg-warning/90" : ""}`}
+            disabled={!comment.trim() || addComment.isPending}
+          >
+            {addComment.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Send className="h-3 w-3 mr-1.5" />}
+            {isInternal ? "Add Note" : "Send Reply"}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+});
 
 export function TicketDetails({ activeTicketId }: { activeTicketId: string | null }) {
   const { data: response, isLoading } = useTicket(activeTicketId || "")
-  const addComment = useAddTicketComment()
   const updateTicket = useUpdateTicket()
-  
-  const [comment, setComment] = useState("")
-  const [isInternal, setIsInternal] = useState(false)
 
   if (!activeTicketId) {
     return (
@@ -39,17 +117,6 @@ export function TicketDetails({ activeTicketId }: { activeTicketId: string | nul
     return <div className="flex-1 flex items-center justify-center text-muted-foreground">Ticket not found.</div>
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-    
-    addComment.mutate({ id: ticket.id, content: comment, isInternal }, {
-      onSuccess: () => {
-        setComment("");
-      }
-    });
-  }
-
   const toggleStatus = () => {
     const nextStatus = ticket.status === 'RESOLVED' ? 'REOPENED' : 'RESOLVED';
     updateTicket.mutate({ id: ticket.id, data: { status: nextStatus as any } });
@@ -68,9 +135,9 @@ export function TicketDetails({ activeTicketId }: { activeTicketId: string | nul
           <div className="flex flex-col gap-1">
             <h2 className="font-semibold text-xl leading-tight">{ticket.subject}</h2>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-muted">{ticket.ticketNumber}</span>
+              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-muted tabular-nums">{ticket.ticketNumber}</span>
               <span className="flex items-center gap-1"><UserIcon className="w-3 h-3" /> {ticket.customer?.displayName}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1 tabular-nums"><Clock className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
           <Button variant={ticket.status === 'RESOLVED' ? 'outline' : 'default'} onClick={toggleStatus} className="shrink-0">
@@ -110,7 +177,7 @@ export function TicketDetails({ activeTicketId }: { activeTicketId: string | nul
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm truncate">{ticket.customer?.displayName}</span>
                 <span className="text-xs text-foreground-muted whitespace-nowrap">via {ticket.origin}</span>
-                <span className="text-[10px] text-foreground-muted ml-auto whitespace-nowrap">{new Date(ticket.createdAt).toLocaleString()}</span>
+                <span className="text-[10px] text-foreground-muted ml-auto whitespace-nowrap tabular-nums">{new Date(ticket.createdAt).toLocaleString()}</span>
               </div>
               <div className="bg-surface border border-border-subtle rounded-md p-3 text-[13px] whitespace-pre-wrap text-foreground mt-1">
                 {ticket.description}
@@ -147,14 +214,14 @@ export function TicketDetails({ activeTicketId }: { activeTicketId: string | nul
                   {c.isInternal && (
                     <span className="text-[9px] uppercase font-bold text-warning-muted tracking-wider">Internal</span>
                   )}
-                  <span className="text-[10px] text-foreground-muted ml-auto whitespace-nowrap">{new Date(c.createdAt).toLocaleString()}</span>
+                  <span className="text-[10px] text-foreground-muted ml-auto whitespace-nowrap tabular-nums">{new Date(c.createdAt).toLocaleString()}</span>
                 </div>
                 <div className={`border p-3 text-[13px] mt-1 ${
                   c.isInternal 
                     ? 'bg-warning/5 border-warning/20 rounded-md text-foreground' 
                     : 'bg-surface border-border-subtle rounded-md text-foreground'
                 }`}>
-                  <ReactMarkdown>{c.content}</ReactMarkdown>
+                  <MarkdownRenderer content={c.content} />
                 </div>
               </div>
             </div>
@@ -182,35 +249,7 @@ export function TicketDetails({ activeTicketId }: { activeTicketId: string | nul
 
       {/* Composer */}
       {ticket.status !== 'CLOSED' && (
-        <div className="p-4 bg-background border-t border-border-subtle shrink-0">
-          <form onSubmit={handleSubmit} className={`max-w-3xl mx-auto rounded-md border flex flex-col transition-colors bg-surface ${isInternal ? 'border-warning/40 ring-1 ring-warning/20' : 'border-border focus-within:ring-1 focus-within:ring-primary focus-within:border-primary'}`}>
-            <div className={`px-3 py-1.5 text-[11px] font-medium border-b flex items-center gap-2 ${isInternal ? 'bg-warning/10 text-warning-muted border-warning/20' : 'bg-background-subtle text-foreground-muted border-border-subtle'}`}>
-              {isInternal ? <Lock className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
-              {isInternal ? 'Private Internal Note' : 'Public Reply'}
-            </div>
-            <textarea 
-              className={`w-full min-h-[80px] p-3 text-[13px] resize-none focus:outline-none bg-transparent`}
-              placeholder={isInternal ? "Type a private note visible only to your team..." : "Type your reply to the customer (Markdown supported)..."}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <div className={`flex justify-between items-center px-2 py-2 border-t ${isInternal ? 'bg-warning/5 border-warning/20' : 'bg-background-subtle border-border-subtle'}`}>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="sm"
-                className={`h-7 text-[11px] ${isInternal ? 'text-warning-muted hover:bg-warning/10 hover:text-warning' : 'text-foreground-muted hover:text-foreground'}`}
-                onClick={() => setIsInternal(!isInternal)}
-              >
-                <Lock className="mr-1.5 h-3 w-3" /> {isInternal ? 'Switch to Public Reply' : 'Make Internal'}
-              </Button>
-              <Button type="submit" size="sm" className={`h-7 text-[11px] ${isInternal ? 'bg-warning text-warning-foreground hover:bg-warning/90' : ''}`} disabled={!comment.trim() || addComment.isPending}>
-                {addComment.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Send className="h-3 w-3 mr-1.5" />}
-                {isInternal ? 'Add Note' : 'Send Reply'}
-              </Button>
-            </div>
-          </form>
-        </div>
+        <TicketCommentComposer ticketId={ticket.id} />
       )}
     </div>
   )

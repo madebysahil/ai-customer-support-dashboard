@@ -91,7 +91,7 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
                 <item.icon className={cn("h-[18px] w-[18px] shrink-0", !isCollapsed && "mr-3", isActive ? "text-primary" : "text-foreground-muted")} />
                 {!isCollapsed && <span className="truncate">{item.title}</span>}
                 {!isCollapsed && item.badge && (
-                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-medium text-primary">
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-medium text-primary tabular-nums">
                     {item.badge}
                   </span>
                 )}

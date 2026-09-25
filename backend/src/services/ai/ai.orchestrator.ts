@@ -1,5 +1,5 @@
 import { IAiProvider } from '../../ai/provider.interface';
-import { geminiProvider } from '../../ai/gemini.provider';
+import { openrouterProvider } from '../../ai/openrouter.provider';
 import { PromptBuilder } from '../../ai/prompt.builder';
 import { ContextBuilder } from '../../ai/context.builder';
 import { messageService } from '../message.service';
@@ -13,7 +13,7 @@ export type AiProcessingState = 'IDLE' | 'THINKING' | 'RESPONDING' | 'FAILED' | 
 export class AiOrchestrator {
   private provider: IAiProvider;
 
-  constructor(provider: IAiProvider = geminiProvider) {
+  constructor(provider: IAiProvider = openrouterProvider) {
     this.provider = provider;
   }
 

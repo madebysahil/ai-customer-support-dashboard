@@ -86,7 +86,7 @@ export default function AiAssistantPage() {
     try {
       abortControllerRef.current = new AbortController();
       
-      const response = await fetch('/api/v1/ai/stream', {
+      const response = await fetch('/api/v1/copilot/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

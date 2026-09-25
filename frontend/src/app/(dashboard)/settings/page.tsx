@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Shield, Bell, Palette, Sparkles, Building, Settings as SettingsIcon, Loader2, Save } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general")

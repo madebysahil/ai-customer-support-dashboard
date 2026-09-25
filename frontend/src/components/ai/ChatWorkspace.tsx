@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import React, { useState, useRef, useEffect, memo } from 'react';
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Square, RefreshCcw, Sparkles, Copy, Download, Edit2, Check, X, FileText, Paperclip } from "lucide-react";
@@ -94,7 +93,7 @@ export function ChatWorkspace({ messages, isStreaming, onSendMessage, onStop, on
           </div>
         ) : (
           messages.map((msg, i) => (
-            <div key={msg.id || i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id || i} className={`flex animate-slide-up ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[85%] rounded-2xl p-4 ${
                 msg.role === 'user' 
                   ? 'bg-primary text-primary-foreground rounded-tr-sm' 
@@ -103,9 +102,7 @@ export function ChatWorkspace({ messages, isStreaming, onSendMessage, onStop, on
                 {msg.role === 'model' ? (
                   <div className="group relative">
                     <div className="prose prose-sm dark:prose-invert max-w-none break-words">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content}
-                      </ReactMarkdown>
+                      <MarkdownRenderer content={msg.content} isStreaming={isStreaming && i === messages.length - 1} />
                     </div>
                     {!isStreaming && (
                       <div className="absolute -bottom-8 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -155,8 +152,8 @@ export function ChatWorkspace({ messages, isStreaming, onSendMessage, onStop, on
             </div>
           ))
         )}
-        {isStreaming && (
-          <div className="flex justify-start">
+        {isStreaming && (messages.length === 0 || messages[messages.length - 1].role !== 'model' || !messages[messages.length - 1].content) && (
+          <div className="flex justify-start animate-slide-up">
             <div className="bg-muted border text-foreground rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
               <div className="flex space-x-1.5 items-center h-5">
                 <div className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>

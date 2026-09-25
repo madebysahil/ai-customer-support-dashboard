@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/contexts/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { Loader2 } from "lucide-react"

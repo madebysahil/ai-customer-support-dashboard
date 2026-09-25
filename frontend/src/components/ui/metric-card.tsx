@@ -3,7 +3,7 @@ import { LucideIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
   value: string | number
   icon?: LucideIcon
@@ -12,11 +12,24 @@ interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
     label: string
     positive?: boolean
   }
+  interactive?: boolean
 }
 
-export function MetricCard({ title, value, icon: Icon, trend, className, ...props }: MetricCardProps) {
+export function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  className,
+  interactive = false,
+  ...props
+}: MetricCardProps) {
   return (
-    <Card className={cn("overflow-hidden", className)} {...props}>
+    <Card
+      interactive={interactive}
+      className={cn("overflow-hidden hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-200", className)}
+      {...props}
+    >
       <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm font-medium text-foreground-muted">{title}</p>

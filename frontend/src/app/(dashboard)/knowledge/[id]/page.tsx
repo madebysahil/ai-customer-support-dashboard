@@ -9,6 +9,7 @@ import { useKnowledgeDoc } from "@/hooks/useKnowledge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useQueryClient } from "@tanstack/react-query"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 export default function DocumentDetailsPage() {
   const { id } = useParams()
@@ -96,14 +97,14 @@ export default function DocumentDetailsPage() {
           <div className="bg-surface border border-border-subtle rounded-md overflow-hidden flex flex-col">
             <div className="py-2.5 px-4 border-b border-border-subtle bg-background-subtle">
               <div className="flex items-center justify-between text-[11px] text-foreground-muted font-mono font-medium">
-                <span className="flex items-center gap-1.5"><KeySquare className="h-3 w-3" /> Raw Text</span>
+                <span className="flex items-center gap-1.5"><KeySquare className="h-3 w-3" /> Markdown View</span>
                 <span className="flex items-center gap-1.5">
                   <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-success" /> Synced</span>
                 </span>
               </div>
             </div>
-            <div className="p-4 text-[13px] text-foreground whitespace-pre-wrap">
-              {doc.content}
+            <div className="p-6 text-[13px] text-foreground">
+              <MarkdownRenderer content={doc.content} />
             </div>
           </div>
         </div>

@@ -4,15 +4,18 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/layout/ThemeProvider"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { Providers } from "@/components/providers/Providers"
+import { Toaster } from "@/components/ui/toaster"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "AI Customer Support Dashboard",
   description: "Enterprise SaaS platform for AI-powered customer support.",
 }
-
-import { Toaster } from "@/components/ui/toaster"
 
 export default function RootLayout({
   children,
@@ -21,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen antialiased`}>
+      <body className={`${inter.variable} ${inter.className} font-sans min-h-screen antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -1,13 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "@/hooks/useAuth"
+import { useState, useRef } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { Shield, Users, Key, Activity, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { formatDistanceToNow } from "date-fns"
+import { useVirtualizer } from "@tanstack/react-virtual"
+
+function AuditLogVirtualTable({ logs, auditLoading }: { logs: any[]; auditLoading: boolean }) {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  const auditVirtualizer = useVirtualizer({
+    count: logs.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 48,
+    overscan: 8,
+    enabled: logs.length > 0,
+  });
+
+  const virtualItems = auditVirtualizer.getVirtualItems();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const paddingBottom = virtualItems.length > 0
+    ? auditVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
+    : 0;
+
+  if (auditLoading) {
+    return (
+      <div className="p-12 flex justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-foreground-muted" />
+      </div>
+    );
+  }
+
+  return (
+    <div ref={tableContainerRef} className="max-h-[560px] overflow-auto border-b">
+      <Table>
+        <TableHeader className="sticky top-0 bg-background-subtle z-10 shadow-sm">
+          <TableRow>
+            <TableHead>Timestamp</TableHead>
+            <TableHead>Actor</TableHead>
+            <TableHead>Action</TableHead>
+            <TableHead>Details</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paddingTop > 0 && (
+            <tr>
+              <td colSpan={4} style={{ height: `${paddingTop}px` }} />
+            </tr>
+          )}
+          {virtualItems.map((virtualRow) => {
+            const log = logs[virtualRow.index];
+            return (
+              <TableRow
+                key={log.id}
+                ref={auditVirtualizer.measureElement}
+                data-index={virtualRow.index}
+              >
+                <TableCell className="text-xs text-foreground-muted whitespace-nowrap">
+                  {formatDistanceToNow(new Date(log.executedAt), { addSuffix: true })}
+                </TableCell>
+                <TableCell className="text-sm font-medium">{log.actor?.fullName || 'System'}</TableCell>
+                <TableCell>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded border ${
+                    log.action.includes('Modif') || log.action.includes('Updat') 
+                      ? 'border-warning/30 text-warning bg-warning/10' 
+                      : 'border-info/30 text-info bg-info/10'
+                  }`}>
+                    {log.action}
+                  </span>
+                </TableCell>
+                <TableCell className="text-xs text-foreground-muted">
+                  {log.resourceType}: {log.resourceId} {log.newState ? JSON.stringify(log.newState) : ''}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+          {paddingBottom > 0 && (
+            <tr>
+              <td colSpan={4} style={{ height: `${paddingBottom}px` }} />
+            </tr>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
 
 export default function UsersPage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -122,42 +203,7 @@ export default function UsersPage() {
           <div className="p-4 border-b border-border-subtle bg-background-subtle">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2"><Activity className="w-4 h-4" /> Immutable Audit Log</h3>
           </div>
-          {auditLoading ? (
-            <div className="p-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-foreground-muted" /></div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>Actor</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Details</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {logs.map((log: any) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="text-xs text-foreground-muted whitespace-nowrap">
-                      {formatDistanceToNow(new Date(log.executedAt), { addSuffix: true })}
-                    </TableCell>
-                    <TableCell className="text-sm font-medium">{log.actor?.fullName || 'System'}</TableCell>
-                    <TableCell>
-                      <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded border ${
-                        log.action.includes('Modif') || log.action.includes('Updat') 
-                          ? 'border-warning/30 text-warning bg-warning/10' 
-                          : 'border-info/30 text-info bg-info/10'
-                      }`}>
-                        {log.action}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-xs text-foreground-muted">
-                      {log.resourceType}: {log.resourceId} {log.newState ? JSON.stringify(log.newState) : ''}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <AuditLogVirtualTable logs={logs} auditLoading={auditLoading} />
         </div>
       )}
     </div>

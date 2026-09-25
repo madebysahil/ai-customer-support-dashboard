@@ -22,7 +22,7 @@ router.use('/tickets', ticketRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/knowledge', knowledgeRoutes);
-router.use('/ai', aiRoutes);
+router.use('/copilot', aiRoutes);
 router.use('/users', usersRoutes);
 router.use('/audit-logs', auditRoutes);
 router.use('/settings', settingsRoutes);

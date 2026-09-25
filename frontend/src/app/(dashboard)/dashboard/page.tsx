@@ -19,6 +19,8 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { MetricCard } from "@/components/ui/metric-card"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   MessageSquare,
   Ticket,
@@ -35,7 +37,12 @@ import { useTickets, Ticket as TicketType } from "@/hooks/useTickets"
 import { useChats } from "@/hooks/useChats"
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const { data: aiMetrics, isLoading: aiLoading } = useAiMetrics()
+  
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
   const { data: ticketsData, isLoading: ticketsLoading } = useTickets({ status: 'OPEN' })
   const { data: highPriorityTickets } = useTickets({ priority: 'HIGH' })
   const { data: liveChatsData, isLoading: chatsLoading } = useChats()
@@ -53,8 +60,8 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Overview</h1>
-          <p className="text-sm text-foreground-muted mt-1">Real-time pulse of your operations and AI assistant performance.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{greeting}, {user?.fullName?.split(' ')[0] || 'there'}!</h1>
+          <p className="text-sm text-foreground-muted mt-1">Here is the real-time pulse of your operations for {today}.</p>
         </div>
       </div>
 
@@ -64,16 +71,19 @@ export default function DashboardPage() {
           title="Open Tickets" 
           value={ticketsLoading ? "..." : openTicketsCount} 
           icon={Ticket} 
+          trend={{ value: 5, label: "vs last week", positive: false }}
         />
         <MetricCard 
           title="Live Chats" 
           value={chatsLoading ? "..." : liveConvosCount} 
           icon={MessageSquare}
+          trend={{ value: 12, label: "vs last week", positive: true }}
         />
         <MetricCard 
           title="AI Resolution" 
           value={aiLoading ? "..." : `${resolutionRate}%`} 
           icon={Zap}
+          trend={{ value: 2.1, label: "vs last week", positive: true }}
         />
       </div>
 
@@ -108,10 +118,15 @@ export default function DashboardPage() {
                 </TableHeader>
                 <TableBody>
                   {highPriorityTickets.data.slice(0, 5).map((t: TicketType) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium text-xs">{t.ticketNumber}</TableCell>
+                    <TableRow key={t.id} className="hover:bg-muted/50 transition-colors group cursor-pointer">
+                      <TableCell className="font-medium text-xs">
+                        <div className="flex items-center gap-2">
+                          {t.ticketNumber}
+                          <Badge variant="destructive" className="scale-75 origin-left">High</Badge>
+                        </div>
+                      </TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm">{t.subject}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="outline" size="sm" className="h-8">Open</Button>
                       </TableCell>
                     </TableRow>

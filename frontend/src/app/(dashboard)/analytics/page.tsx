@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAiMetrics } from "@/hooks/useAnalytics"
 import { Loader2, Bot, ShieldAlert, Sparkles } from "lucide-react"
 import { MetricCard } from "@/components/ui/metric-card"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { DynamicTokenUsageChart, DynamicEscalationDistributionChart } from "@/components/charts"
 
 export default function AnalyticsDashboardPage() {
   const [daysRange, setDaysRange] = useState(30);
@@ -65,17 +65,7 @@ export default function AnalyticsDashboardPage() {
             <h3 className="text-sm font-semibold text-foreground">AI Token Usage (Tokens / Day)</h3>
             <p className="text-xs text-foreground-muted">Volume of tokens consumed via Gemini API</p>
           </div>
-          <div className="h-[300px] w-full bg-background p-4 pr-8">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={metrics?.timeSeries || []}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border-subtle))" />
-                <XAxis dataKey="date" stroke="hsl(var(--foreground-muted))" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--foreground-muted))" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--surface))', borderColor: 'hsl(var(--border-subtle))', borderRadius: '6px', color: 'hsl(var(--foreground))' }} />
-                <Area type="monotone" dataKey="tokens" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <DynamicTokenUsageChart data={metrics?.timeSeries || []} height={300} />
         </div>
 
         <div className="bg-surface border border-border-subtle rounded-md flex flex-col overflow-hidden">
@@ -83,27 +73,7 @@ export default function AnalyticsDashboardPage() {
             <h3 className="text-sm font-semibold text-foreground">Escalation Distribution</h3>
             <p className="text-xs text-foreground-muted">Breakdown by Ticket Priority Category</p>
           </div>
-          <div className="h-[300px] w-full bg-background p-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={metrics?.escalationByPriority || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {(metrics?.escalationByPriority || []).map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={['hsl(var(--critical))', 'hsl(var(--warning))', 'hsl(var(--info))', 'hsl(var(--foreground-muted))'][index % 4]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--surface))', borderColor: 'hsl(var(--border-subtle))', borderRadius: '6px', color: 'hsl(var(--foreground))' }} />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', color: 'hsl(var(--foreground-muted))' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <DynamicEscalationDistributionChart data={metrics?.escalationByPriority || []} height={300} />
         </div>
       </div>
     </div>

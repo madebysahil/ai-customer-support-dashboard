@@ -1,0 +1,18 @@
+/* Browser autofill style normalization (FEAT-AUTH-07) */
+/* Append to @layer base in frontend/src/app/globals.css */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--surface)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  caret-color: hsl(var(--foreground)) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:autofill {
+  box-shadow: 0 0 0 1000px hsl(var(--surface)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  filter: none;
+}

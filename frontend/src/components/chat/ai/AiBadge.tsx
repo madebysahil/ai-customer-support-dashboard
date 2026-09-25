@@ -6,7 +6,7 @@ export function AiBadge({ confidenceScore }: { confidenceScore?: number }) {
       <Sparkles className="h-3 w-3 text-primary" />
       <span>AI Assistant</span>
       {confidenceScore && (
-        <span className="opacity-70 ml-1 border-l border-ai-border pl-1">
+        <span className="opacity-70 ml-1 border-l border-ai-border pl-1 tabular-nums">
           {Math.round(confidenceScore * 100)}% Match
         </span>
       )}

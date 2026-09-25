@@ -69,7 +69,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Customer> }) => {
-      const res = await api.put(`/customers/${id}`, data, { method: 'PATCH' }); // using fetch wrapper overriding method to PATCH
+      const res = await api.patch(`/customers/${id}`, data);
       return res.json();
     },
     onSuccess: (data, variables) => {

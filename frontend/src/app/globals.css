@@ -4,109 +4,127 @@
 
 @layer base {
   :root {
-    /* Backgrounds */
-    --background: 0 0% 100%;
-    --background-subtle: 0 0% 98%;
+    /* FEAT-DS-01: Blue-Tinted Warm Gray Light Palette */
+    --background: 210 20% 98%;
+    --background-subtle: 210 20% 96%;
     --surface: 0 0% 100%;
-    --surface-raised: 0 0% 99%;
+    --surface-raised: 210 25% 99%;
     
     /* Foregrounds */
-    --foreground: 0 0% 9%;
-    --foreground-muted: 0 0% 45%;
-    --foreground-subtle: 0 0% 64%;
+    --foreground: 222 47% 11%;
+    --foreground-muted: 215 16% 47%;
+    --foreground-subtle: 215 14% 60%;
     
     /* Borders */
-    --border: 0 0% 90%;
-    --border-subtle: 0 0% 94%;
+    --border: 214 20% 90%;
+    --border-subtle: 214 20% 94%;
+    --border-hover: 214 20% 80%;
     
-    /* Interactive */
+    /* FEAT-DS-03: Primary Slate Blue (WCAG AA compliant: 6.29:1 against white) */
     --primary: 222 47% 45%;
     --primary-hover: 222 47% 38%;
     --primary-foreground: 0 0% 100%;
     
-    /* Semantic Status */
+    /* Semantic Status Tokens */
     --success: 152 56% 39%;
-    --warning: 38 92% 50%;
+    --warning: 38 92% 44%;
     --critical: 0 72% 51%;
     --info: 210 100% 45%;
 
-    /* Keep old tokens for backwards compatibility temporarily but map them to new */
+    /* Component Mappings */
     --card: var(--surface);
     --card-foreground: var(--foreground);
     --popover: var(--surface);
     --popover-foreground: var(--foreground);
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 20% 96%;
     --muted-foreground: var(--foreground-muted);
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 210 20% 96%;
+    --accent-foreground: 222 47% 11%;
     --destructive: var(--critical);
     --destructive-foreground: 0 0% 100%;
     --success-foreground: 0 0% 100%;
-    --warning-foreground: 0 0% 9%;
+    --warning-foreground: 222 47% 11%;
     --info-foreground: 0 0% 100%;
     --input: var(--border);
     --ring: var(--primary);
 
-    /* AI (subtle, not thematic) */
-    --ai-surface: 0 0% 97%;
-    --ai-border: 0 0% 88%;
+    /* AI Copilot Surfaces */
+    --ai-surface: 216 28% 97%;
+    --ai-border: 214 22% 88%;
     --ai-accent: 222 47% 45%;
 
     --radius: 6px;
+
+    /* FEAT-ELEV-01: Multi-Tier Elevation Shadows (Light Mode) */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.10), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+    --shadow-popover: 0 12px 28px -4px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+    --shadow-modal: 0 20px 48px -8px rgba(0, 0, 0, 0.16), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
   }
 
   .dark {
-    /* Backgrounds */
-    --background: 0 0% 6%;
-    --background-subtle: 0 0% 4%;
-    --surface: 0 0% 9%;
-    --surface-raised: 0 0% 12%;
+    /* FEAT-DS-02: Blue-Tinted Obsidian Dark Palette */
+    --background: 222 47% 7%;
+    --background-subtle: 222 44% 5%;
+    --surface: 222 40% 10%;
+    --surface-raised: 222 35% 13%;
     
     /* Foregrounds */
-    --foreground: 0 0% 93%;
-    --foreground-muted: 0 0% 55%;
-    --foreground-subtle: 0 0% 40%;
+    --foreground: 210 40% 98%;
+    --foreground-muted: 215 20% 65%;
+    --foreground-subtle: 215 16% 45%;
     
     /* Borders */
-    --border: 0 0% 16%;
-    --border-subtle: 0 0% 12%;
+    --border: 220 20% 16%;
+    --border-subtle: 220 20% 12%;
+    --border-hover: 220 20% 26%;
     
-    /* Interactive */
-    --primary: 222 50% 58%;
-    --primary-hover: 222 50% 65%;
-    --primary-foreground: 0 0% 100%;
+    /* FEAT-DS-03: Primary Slate Blue (WCAG AA compliant: 5.27:1 contrast on dark canvas) */
+    --primary: 217 91% 60%;
+    --primary-hover: 217 91% 68%;
+    --primary-foreground: 222 47% 11%;
     
-    /* Semantic Status */
+    /* Semantic Status Tokens */
     --success: 152 56% 45%;
     --warning: 38 92% 55%;
     --critical: 0 72% 58%;
     --info: 210 100% 55%;
 
-    /* Keep old tokens for backwards compatibility temporarily but map them to new */
+    /* Component Mappings */
     --card: var(--surface);
     --card-foreground: var(--foreground);
     --popover: var(--surface);
     --popover-foreground: var(--foreground);
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 16%;
+    --secondary: 222 35% 13%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 35% 13%;
     --muted-foreground: var(--foreground-muted);
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 222 35% 13%;
+    --accent-foreground: 210 40% 98%;
     --destructive: var(--critical);
     --destructive-foreground: 0 0% 100%;
     --success-foreground: 0 0% 100%;
-    --warning-foreground: 0 0% 98%;
+    --warning-foreground: 222 47% 11%;
     --info-foreground: 0 0% 100%;
     --input: var(--border);
     --ring: var(--primary);
 
-    /* AI (subtle, not thematic) */
-    --ai-surface: 0 0% 11%;
-    --ai-border: 0 0% 18%;
-    --ai-accent: 222 50% 58%;
+    /* AI Copilot Surfaces */
+    --ai-surface: 222 35% 10%;
+    --ai-border: 217 25% 20%;
+    --ai-accent: 217 91% 60%;
+
+    /* FEAT-ELEV-01: Multi-Tier Elevation Shadows with Top Inset Highlight (Dark Mode) */
+    --shadow-xs: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-sm: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+    --shadow-md: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.65), 0 2px 6px -2px rgba(0, 0, 0, 0.45);
+    --shadow-lg: inset 0 1px 0 0 rgba(255, 255, 255, 0.07), 0 12px 28px -4px rgba(0, 0, 0, 0.75), 0 4px 12px -2px rgba(0, 0, 0, 0.55);
+    --shadow-popover: inset 0 1px 0 0 rgba(255, 255, 255, 0.07), 0 16px 36px -4px rgba(0, 0, 0, 0.8), 0 6px 14px -2px rgba(0, 0, 0, 0.6);
+    --shadow-modal: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 24px 48px -8px rgba(0, 0, 0, 0.85), 0 8px 20px -4px rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -116,5 +134,42 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Browser autofill style normalization (FEAT-AUTH-07) */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px hsl(var(--surface)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--foreground)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input:autofill,
+  textarea:autofill,
+  select:autofill {
+    box-shadow: 0 0 0px 1000px hsl(var(--surface)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
   }
 }

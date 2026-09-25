@@ -31,4 +31,6 @@ Thumbs.db
 .prisma/
 
 # TypeScript
-*.tsbuildinfo
+*.tsbuildinfo.agents/
+baseline-bundle.json
+test-cors.js

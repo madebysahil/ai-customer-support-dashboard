@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { api, setAccessToken, getAccessToken } from '@/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { disconnectSocket } from '@/hooks/useSocket';
 
 import { toast } from "@/components/ui/toaster"
 
@@ -47,7 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
     localStorage.clear();
     sessionStorage.clear();
-    disconnectSocket();
+    
+    // Decoupled notification: informs any active socket connection to terminate
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:logout'));
+    }
+    
     router.replace('/login');
   }, [queryClient, router]);
 

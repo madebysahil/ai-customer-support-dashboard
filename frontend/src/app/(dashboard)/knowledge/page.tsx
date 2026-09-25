@@ -93,8 +93,8 @@ export default function KnowledgeBasePage() {
             <p className="text-xs">Upload a PDF or create an article to empower the AI Copilot.</p>
           </div>
         ) : (
-          data?.documents.map((doc) => (
-            <Link key={doc.id} href={`/knowledge/${doc.id}`} className="block h-full group">
+          data?.documents.map((doc, index) => (
+            <Link key={doc.id} href={`/knowledge/${doc.id}`} className="block h-full group animate-slide-up" style={{ animationDelay: `${index < 20 ? index * 50 : 0}ms`, animationFillMode: 'backwards' }}>
               <div className="h-full border border-border-subtle rounded-md p-4 bg-surface hover:border-primary/50 hover:bg-background-subtle transition-colors flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="flex justify-between items-start gap-4 mb-3">

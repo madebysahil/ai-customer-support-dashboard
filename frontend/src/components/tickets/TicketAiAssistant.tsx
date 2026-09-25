@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, memo } from "react"
 import { useTicket } from "@/hooks/useTickets"
 import { Button } from "@/components/ui/button"
 import { Sparkles, Loader2, StopCircle, CornerDownLeft, RefreshCcw, FileText, Type, Shield, Bot, Send } from "lucide-react"
-import ReactMarkdown from "react-markdown"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { getAccessToken } from "@/lib/api"
 
 interface AiMessage {
@@ -14,11 +14,70 @@ interface AiMessage {
   metadata?: any
 }
 
+const StreamingAiBubble = memo(function StreamingAiBubble({
+  content,
+  metadata,
+}: {
+  content: string;
+  metadata?: any;
+}) {
+  return (
+    <div className="flex flex-col gap-1 max-w-[90%] mr-auto">
+      <div className="text-[10px] font-semibold px-1 text-primary flex items-center gap-1">
+        <Sparkles className="w-3 h-3" /> Copilot
+      </div>
+      <div className="p-3 text-[13px] leading-relaxed max-w-none break-words bg-ai-surface border border-ai-border text-foreground rounded-md">
+        {content ? (
+          <MarkdownRenderer content={content} isStreaming={true} />
+        ) : (
+          <span className="flex items-center gap-2 text-foreground-muted">
+            <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
+          </span>
+        )}
+      </div>
+      {metadata?.latencyMs && (
+        <div className="text-[9px] text-foreground-muted px-1 opacity-70">
+          {(metadata.latencyMs / 1000).toFixed(2)}s • {metadata.model || 'AI'}
+        </div>
+      )}
+    </div>
+  );
+});
+
+const AiAssistantMessageItem = memo(function AiAssistantMessageItem({ message }: { message: AiMessage }) {
+  const isUser = message.role === 'user';
+  return (
+    <div className={`flex flex-col gap-1 max-w-[90%] ${isUser ? 'ml-auto' : 'mr-auto'}`}>
+      <div className={`text-[10px] font-semibold px-1 ${isUser ? 'text-right text-foreground-muted' : 'text-primary flex items-center gap-1'}`}>
+        {!isUser && <Sparkles className="w-3 h-3" />}
+        {isUser ? 'You' : 'Copilot'}
+      </div>
+      <div className={`p-3 text-[13px] leading-relaxed max-w-none break-words ${isUser ? 'bg-primary text-primary-foreground rounded-md' : 'bg-ai-surface border border-ai-border text-foreground rounded-md'}`}>
+        <MarkdownRenderer content={message.content} />
+      </div>
+      {message.metadata?.latencyMs && (
+        <div className="text-[9px] text-foreground-muted px-1 opacity-70">
+          {(message.metadata.latencyMs / 1000).toFixed(2)}s • {message.metadata.model || 'AI'}
+        </div>
+      )}
+    </div>
+  );
+}, (prev, next) => {
+  return (
+    prev.message.id === next.message.id &&
+    prev.message.content === next.message.content &&
+    prev.message.role === next.message.role &&
+    prev.message.metadata?.latencyMs === next.message.metadata?.latencyMs
+  );
+});
+
 export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string | null }) {
   const { data: response } = useTicket(activeTicketId || "")
   const ticket = response?.data
   
   const [messages, setMessages] = useState<AiMessage[]>([])
+  const [streamingText, setStreamingText] = useState<string | null>(null)
+  const [streamingMetadata, setStreamingMetadata] = useState<any>(null)
   const [input, setInput] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -62,13 +121,17 @@ export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string |
     }
 
     const aiMessageId = crypto.randomUUID()
-    setMessages(prev => [...prev, { id: aiMessageId, role: 'assistant', content: '' }])
+    setStreamingText("")
+    setStreamingMetadata(null)
     setIsStreaming(true)
+
+    let streamedContent = ''
+    let capturedMetadata: any = null
 
     try {
       abortControllerRef.current = new AbortController()
       
-      const res = await fetch('/api/v1/ai/stream', {
+      const res = await fetch('/api/v1/copilot/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +156,6 @@ export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string |
       if (!reader) throw new Error('No reader available')
       
       const decoder = new TextDecoder()
-      let streamedContent = ''
       let buffer = ''
 
       while (true) {
@@ -110,15 +172,16 @@ export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string |
               const data = JSON.parse(line.slice(6))
               if (data.error) {
                 streamedContent = `⚠️ AI Error: ${data.error}`
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, content: streamedContent } : m))
+                setStreamingText(streamedContent)
                 break
               }
               if (data.text) {
                 streamedContent += data.text
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, content: streamedContent } : m))
+                setStreamingText(streamedContent)
               }
               if (data.metadata) {
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, metadata: data.metadata } : m))
+                capturedMetadata = data.metadata
+                setStreamingMetadata(data.metadata)
               }
             } catch (e) {
               console.error("SSE Parse error:", e)
@@ -129,9 +192,15 @@ export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string |
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         console.error("Stream error:", error)
-        setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, content: `⚠️ Connection error: ${error.message}` } : m))
+        streamedContent = `⚠️ Connection error: ${error.message}`
+        setStreamingText(streamedContent)
       }
     } finally {
+      if (streamedContent) {
+        setMessages(prev => [...prev, { id: aiMessageId, role: 'assistant', content: streamedContent, metadata: capturedMetadata }])
+      }
+      setStreamingText(null)
+      setStreamingMetadata(null)
       setIsStreaming(false)
       abortControllerRef.current = null
     }
@@ -188,28 +257,20 @@ export function TicketAiAssistant({ activeTicketId }: { activeTicketId: string |
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-background">
-        {messages.length === 0 ? (
+        {messages.length === 0 && streamingText === null ? (
           <div className="text-center p-6 mt-4 border border-dashed border-border-subtle rounded-md bg-background-subtle text-foreground-muted">
             <Sparkles className="w-6 h-6 mx-auto mb-2 text-foreground-subtle" />
             <p className="text-[11px]">I&apos;m ready to assist with Ticket <span className="font-mono">{ticket.ticketNumber}</span>. How can I help?</p>
           </div>
         ) : (
-          messages.map((m) => (
-            <div key={m.id} className={`flex flex-col gap-1 max-w-[90%] ${m.role === 'user' ? 'ml-auto' : 'mr-auto'}`}>
-              <div className={`text-[10px] font-semibold px-1 ${m.role === 'user' ? 'text-right text-foreground-muted' : 'text-primary flex items-center gap-1'}`}>
-                {m.role === 'assistant' && <Sparkles className="w-3 h-3" />}
-                {m.role === 'user' ? 'You' : 'Copilot'}
-              </div>
-              <div className={`p-3 text-[13px] leading-relaxed max-w-none break-words ${m.role === 'user' ? 'bg-primary text-primary-foreground rounded-md' : 'bg-ai-surface border border-ai-border text-foreground rounded-md'}`}>
-                {m.content ? <ReactMarkdown>{m.content}</ReactMarkdown> : <span className="flex items-center gap-2 text-foreground-muted"><Loader2 className="w-3 h-3 animate-spin" /> Thinking...</span>}
-              </div>
-              {m.metadata?.latencyMs && (
-                <div className="text-[9px] text-foreground-muted px-1 opacity-70">
-                  {(m.metadata.latencyMs / 1000).toFixed(2)}s • {m.metadata.model || 'AI'}
-                </div>
-              )}
-            </div>
-          ))
+          <>
+            {messages.map((m) => (
+              <AiAssistantMessageItem key={m.id} message={m} />
+            ))}
+            {streamingText !== null && (
+              <StreamingAiBubble content={streamingText} metadata={streamingMetadata} />
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
